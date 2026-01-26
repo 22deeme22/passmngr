@@ -1,11 +1,14 @@
+use serde::{Serialize, Deserialize};
+use std::fs;
+use serde_json::{from_str, from_value, to_string_pretty};
 use clap::{Parser};
 
+#[derive(Serialize, Deserialize, Debug)]
 struct Entry {
     service: String,
     login: String,
     password: String,
 }
-
 
 #[derive(Parser)]
 #[command(author, version, about)]
@@ -18,11 +21,19 @@ struct Cli {
 #[derive(Parser)]
 enum Commands {
     Add {
+        /// Enter service here.
+        #[arg(long, short)]
         service: String,
+        /// Enter your login.
+        #[arg(long, short)]
         login: String,
+        /// Enter your password.
+        #[arg(long, short)]
         password: String,
     },
     Remove{
+        /// Enter service here.
+        #[arg(long, short)]
         service: String
     },
     List,
@@ -30,29 +41,27 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let mut entries: Vec<Entry> = Vec::new();
     match cli.command {
         Commands::Add { service, login, password } => {
-            entries.push(Entry { service, login, password });
+            let value = fs::read_to_string("data/data.json").expect("error");
+            let mut entries = from_str::<Vec<Entry>>(&value).expect("error");
+            entries.push(Entry{ service, login, password });
+            let json = to_string_pretty(&entries).expect("error");
+            fs::write("data/data.json", json).expect("error");
         }
 
         Commands::Remove { service } => {
-            for i in 0..=entries.len()-1 {
-                match entries.get(i) {
-                   Some(entry) => { 
-                       if service == entry.service {entries.remove(i);}
-                       else {println!("Doesn't have this service in the manager.");}
-                       
-                   }
-                   None => {continue;}
-                }
-            }
+            let value = fs::read_to_string("data/data.json").expect("error");
+            let mut entries = from_str::<Vec<Entry>>(&value).expect("error");
+            entries.retain(|entry| entry.service != service);
+            let json = to_string_pretty(&entries).expect("error");
+            fs::write("data/data.json", json).expect("error");
         }
 
         Commands::List => {
-            for entry in entries{
-                println!("{}", entry.service)
-            }
+            let value = fs::read_to_string("data/data.json").expect("error");
+            let entries = from_str::<Vec<Entry>>(&value).expect("error");
+            println!("{:#?}", entries);
         }
         
     }
