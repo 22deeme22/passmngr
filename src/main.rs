@@ -12,10 +12,10 @@ use argon2::{self, Argon2, password_hash::rand_core::{RngCore}};
 const SALT_SIZE_BYTES: usize = 16;
 const NONCE_SIZE_BYTES: usize = 12;
 
-const TYPE_PWD:&str = "Type your password:";
-const CHOOSE_PWD:&str = "Choose your password:";
+const TYPE_PWD:&str = "Type your 'passmngr' password:";
+const CHOOSE_PWD:&str = "Choose your 'passmngr' password:";
 const WRONG_PWD:&str = "Wrong password!";
-const PWD_CONFIRMATION:&str = "Confirm your password:";
+const PWD_CONFIRMATION:&str = "Confirm your 'passmngr' password:";
 const PWD_NOT_CORRESPOND:&str = "You wrote two different password.";
 const EMPTY_DATA:&str = "You have no entry in your list yet!"; 
 const NO_SERVICE:&str = "No service corresponding.";
@@ -48,8 +48,6 @@ enum Commands{
         service: String,
         #[arg(short)]
         login: String,
-        #[arg(short)]
-        password: String,
     },
     /// Delete the entry of the service specified.
     Remove{
@@ -119,15 +117,17 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     let cli = Cli::parse();
     match cli.command {
-        Commands::Add { service, login, password } => {
+        Commands::Add { service, login } => {
 
+            let pwd = prompt_password(&format!("Write the password of your {} account:", service))?;
+            
             if entries.iter().any(|entry| entry.service == service) {
                 println!("{}",EXIST_ALREADY);
                 process::abort();
             }
-            
+
             // Add the entry that the user wrote to the vector
-            entries.push(Entry{ service, login, password});
+            entries.push(Entry{ service, login, password: pwd});
 
             // Prepare encrypted, that contains the salt, the nonce and entries encrypted
             let mut encrypted = Vec::new();

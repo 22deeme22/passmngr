@@ -21,11 +21,11 @@ It's ready to use! :shipit:
 To use the password manager, you have to write **passmngr** followed by one of this command:
 - **add**:
 
-With this command, you add an entry to your password manager file, you have to specify the service, your login and your password.
+With this command, you add an entry to your password manager file, you have to specify the service and the login.
 
 Use:
 ```
-passmngr add -s github -l 22deeme22 -p 12345678
+passmngr add -s github -l 22deeme22 
 ```
 - **remove**: 
 
