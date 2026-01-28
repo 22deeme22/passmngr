@@ -42,7 +42,7 @@ struct Cli {
 
 #[derive(Parser)]
 enum Commands{
-    /// Add an entry of service (-s), login (-l) and password (-p) specified.
+    /// Add an entry of service (-s), login (-l) and password specified.
     Add {
         #[arg(short)]
         service: String,
